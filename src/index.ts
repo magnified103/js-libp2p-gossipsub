@@ -965,14 +965,16 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
 
     // remove peer from topics map
     for (const [topic, peers] of this.topics) {
-      console.log(`Topic ${topic}: remove ${id}`)
+      const now = Date.now()
+      console.log(`Topic ${topic} at ${now}: remove ${id}`)
       peers.delete(id)
     }
 
     // Remove this peer from the mesh
     for (const [topicStr, peers] of this.mesh) {
       if (peers.delete(id)) {
-        console.log(`Mesh ${topicStr}: remove ${id}`)
+        const now = Date.now()
+        console.log(`Mesh ${topicStr} at ${now}: remove ${id}`)
         this.metrics?.onRemoveFromMesh(topicStr, ChurnReason.Dc, 1)
       }
     }
@@ -1202,10 +1204,12 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
     if (subscribe) {
       // subscribe peer to new topic
       topicSet.add(from.toString())
-      console.log(`Topic ${topic}: add ${from.toString()}`)
+      const now = Date.now()
+      console.log(`Topic ${topic} at ${now}: add ${from.toString()}`)
     } else {
       // unsubscribe from existing topic
-      console.log(`Topic ${topic}: remove ${from.toString()}`)
+      const now = Date.now()
+      console.log(`Topic ${topic} at ${now}: remove ${from.toString()}`)
       topicSet.delete(from.toString())
     }
 
@@ -1676,7 +1680,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
         this.log('GRAFT: Add mesh link from %s in %s', id, topicID)
         this.score.graft(id, topicID)
         peersInMesh.add(id)
-        console.log(`Mesh ${topicID}: add ${id}, size=${peersInMesh.size} set=${Array.from(peersInMesh)}`)
+        const now = Date.now()
+        console.log(`Mesh ${topicID} at ${now}: add ${id}`)
 
         this.metrics?.onAddToMesh(topicID, InclusionReason.Subscribed, 1)
       }
@@ -1711,7 +1716,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
       this.log('PRUNE: Remove mesh link to %s in %s', id, topicID)
       this.score.prune(id, topicID)
       if (peersInMesh.has(id)) {
-        console.log(`Mesh ${topicID}: remove ${id}, size=${peersInMesh.size}`)
+        const now = Date.now()
+        console.log(`Mesh ${topicID} at ${now}: remove ${id}`)
         peersInMesh.delete(id)
         this.metrics?.onRemoveFromMesh(topicID, ChurnReason.Prune, 1)
       }
@@ -2010,7 +2016,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
 
     this.mesh.set(topic, toAdd)
     toAdd.forEach((id) => {
-      console.log(`Mesh ${topic}: add ${id}, size=${toAdd.size} set=${Array.from(toAdd)}`)
+      const now = Date.now()
+      console.log(`Mesh ${topic} at ${now}: add ${id}`)
     })
 
     toAdd.forEach((id) => {
@@ -2047,7 +2054,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
         this.log('Error sending prunes to mesh peers', err)
       })
       this.mesh.get(topic)?.forEach((id) => {
-        console.log(`Mesh ${topic}: remove ${id}, size=${meshPeers.size}`)
+        const now = Date.now()
+        console.log(`Mesh ${topic} at ${now}: remove ${id}`)
       })
       this.mesh.delete(topic)
     }
@@ -2883,7 +2891,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
         // add prune backoff record
         this.addBackoff(id, topic)
         // remove peer from mesh
-        console.log(`Mesh ${topic}: remove ${id}, size=${peers.size}`)
+        const now = Date.now()
+        console.log(`Mesh ${topic} at ${now}: remove ${id}`)
         peers.delete(id)
         // after pruning a peer from mesh, we want to gossip topic to it if its score meet the gossip threshold
         if (getScore(id) >= this.opts.scoreThresholds.gossipThreshold) peersToGossip.add(id)
@@ -2903,7 +2912,8 @@ export class GossipSub extends TypedEventEmitter<GossipsubEvents> implements Pub
         this.score.graft(id, topic)
         // add peer to mesh
         peers.add(id)
-        console.log(`Mesh ${topic}: add ${id}, size=${peers.size} set=${Array.from(peers)}`)
+        const now = Date.now()
+        console.log(`Mesh ${topic} at ${now}: add ${id}`)
         // when we add a new mesh peer, we don't want to gossip messages to it
         peersToGossip.delete(id)
         this.metrics?.onAddToMesh(topic, reason, 1)
